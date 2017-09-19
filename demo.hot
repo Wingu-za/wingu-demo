@@ -1,0 +1,100 @@
+heat_template_version: 2015-04-30
+
+description: Wingu Demo Heat Template
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: wingu-demo
+  image:
+    type: string
+    description: Name of image to use for servers
+    default: Ubuntu Core 16
+  flavor:
+    type: string
+    description: Flavor to use for servers
+    default: gen1.medium
+  public_net_id:
+    type: string
+    description: >
+      ID or name of public network for which floating IP addresses will be allocated
+    default: e20255b5-afc7-4bd4-ab79-9f02d978980b
+  private_net_id:
+    type: string
+    description: ID of private network into which servers get deployed
+    default: e5a2340f-dd11-4b94-a4c6-67026b02c8f4
+  private_subnet_id:
+    type: string
+    description: ID of private sub network into which servers get deployed
+    default: de93956a-b0ab-4840-ba57-c779fb6f9b02
+  
+  
+resources:
+  server1:
+    type: OS::Nova::Server
+    properties:
+      name: Server1
+      image: { get_param: image}
+      flavor: { get_param: flavor}
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: server1_port }
+
+  server1_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_id }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet_id }
+      security_groups: [{ get_resource: server_security_group }]
+
+  server1_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: server1_port }
+
+  server2:
+    type: OS::Nova::Server
+    properties:
+      name: Server2
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: server2_port }
+
+  server2_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_id }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet_id }
+      security_groups: [{ get_resource: server_security_group }]
+
+  server2_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: server2_port }
+
+  server_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Add security group rules for server
+      name: security-group
+      rules:
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 443
+          port_range_max: 443
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: icmp
