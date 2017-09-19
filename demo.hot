@@ -35,7 +35,7 @@ resources:
     properties:
       group: ansible
       config:
-        get_file: config-scripts/ansible-template.ansible
+        get_file: https://raw.githubusercontent.com/TachyonProject/wingu-demo/master/config-scripts/ansible-template.ansible
         
   server1:
     type: OS::Nova::Server
