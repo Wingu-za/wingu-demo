@@ -30,6 +30,13 @@ parameters:
   
   
 resources:
+  config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ansible
+      config:
+        get_file: config-scripts/ansible-template.ansible
+        
   server1:
     type: OS::Nova::Server
     properties:
