@@ -27,38 +27,6 @@ parameters:
     type: string
     description: ID of private sub network into which servers get deployed
     default: de93956a-b0ab-4840-ba57-c779fb6f9b02
-  
-  
-resources:
-  server_pw:
-    type: OS::Heat::RandomString 
-  
-  nginx_config:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ansible
-      config: |
-        ---
-        - name: Install and run Nginx
-          connection: local
-          hosts: localhost
-          tasks: 
-            - name: Install Nginx
-              apt: pkg=nginx state=installed update_cache=True
-              notify:
-                - Start Nginx
-          handlers:
-            - name: Start Nginx
-              service: name=nginx state=started
-  
-  deploy_nginx_server1:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: TEMP_URL_SIGNAL
-      config:
-        get_resource: nginx_config
-      server:
-        get_resource: server1
         
   server1:
     type: OS::Nova::Server
@@ -70,8 +38,14 @@ resources:
       networks:
         - port: { get_resource: server1_port }
       software_config_transport: POLL_TEMP_URL
-      user_data_format: SOFTWARE_CONFIG 
-  
+      user_data: |
+        #!/bin/bash -v
+        sudo apt update -y && sudo apt upgrade -y
+        sudo apt install nginx git ansible -y
+        git clone https://github.com/TachyonProject/ansible-django-stack
+        cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
+        cd ~/ansible-django-stack & ansible-playbook -vvvv -i ansible/inventory.ini ansible/playbooks/playbook-all.yml
+
   server1_port:
     type: OS::Neutron::Port
     properties:
@@ -134,18 +108,6 @@ resources:
           protocol: icmp
 
 outputs:
-  stdout:
-    description: Ansible Output
-    value:
-      get_attr: [ deploy_nginx_server1, deploy_stdout ]
-  stderr:
-    description: Ansible Error Output
-    value:
-      get_attr: [ deploy_nginx_server1, deploy_stderr ]
-  status_code:
-    description: Exit Code
-    value:
-      get_attr: [ deploy_nginx_server1, deploy_status_code ]
   server_ip:
     description: Server IP Address
     value:
