@@ -9,7 +9,7 @@ parameters:
   image:
     type: string
     description: Name of image to use for servers
-    default: Ubuntu Core 16
+    default: Ubuntu 16.04 (Xenial)
   flavor:
     type: string
     description: Flavor to use for servers
