@@ -34,7 +34,7 @@ resources:
     type: OS::Heat::RandomString 
   
   nginx_config:
-    type: OS::HEAT::SoftwareConfig
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ansible
       config: |
