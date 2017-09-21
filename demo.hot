@@ -1,120 +1,151 @@
+--- 
+description: "Wingu Demo Heat Template"
 heat_template_version: 2015-04-30
-
-description: Wingu Demo Heat Template
-parameters:
-  key_name:
-    type: string
-    description: Name of keypair to assign to servers
-    default: wingu-demo
-  image:
-    type: string
-    description: Name of image to use for servers
-    default: Ubuntu 16.04 (Xenial)
-  flavor:
-    type: string
-    description: Flavor to use for servers
+outputs: 
+  server1_private_ip: 
+    description: "IP address of server on private network"
+    value: 
+      get_attr: 
+        - server1
+        - first_address
+  server1_public_ip: 
+    description: "Floating IP address of server on public network"
+    value: 
+      get_attr: 
+        - server1_floating_ip
+        - floating_ip_address
+  server2_private_ip: 
+    description: "IP address of server on private network"
+    value: 
+      get_attr: 
+        - server2
+        - first_address
+  server2_public_ip: 
+    description: "Floating IP address of server on public network"
+    value: 
+      get_attr: 
+        - server2_floating_ip
+        - floating_ip_address
+parameters: 
+  flavor: 
     default: gen1.medium
-  public_net_id:
+    description: "Flavor to use for servers"
     type: string
-    description: >
-      ID or name of public network for which floating IP addresses will be allocated
-    default: e20255b5-afc7-4bd4-ab79-9f02d978980b
-  private_net_id:
+  image: 
+    default: "Ubuntu 16.04 (Xenial)"
+    description: "Name of image to use for servers"
     type: string
-    description: ID of private network into which servers get deployed
+  key_name: 
+    default: wingu-demo
+    description: "Name of keypair to assign to servers"
+    type: string
+  private_net_id: 
     default: e5a2340f-dd11-4b94-a4c6-67026b02c8f4
-  private_subnet_id:
+    description: "ID of private network into which servers get deployed"
     type: string
-    description: ID of private sub network into which servers get deployed
+  private_subnet_id: 
     default: de93956a-b0ab-4840-ba57-c779fb6f9b02
-        
-  server1:
-    type: OS::Nova::Server
-    properties:
+    description: "ID of private sub network into which servers get deployed"
+    type: string
+  public_net_id: 
+    default: e20255b5-afc7-4bd4-ab79-9f02d978980b
+    description: "ID or name of public network for which floating IP addresses will be allocated\n"
+    type: string
+  server1: 
+    properties: 
+      flavor: 
+        get_param: flavor
+      image: 
+        get_param: image
+      key_name: 
+        get_param: key_name
       name: Server1
-      image: { get_param: image}
-      flavor: { get_param: flavor}
-      key_name: { get_param: key_name }
-      networks:
-        - port: { get_resource: server1_port }
+      networks: 
+        - 
+          port: 
+            get_resource: server1_port
       software_config_transport: POLL_TEMP_URL
       user_data: |
-        #!/bin/bash -v
-        sudo apt update -y && sudo apt upgrade -y
-        sudo apt install nginx git ansible -y
-        git clone https://github.com/TachyonProject/ansible-django-stack
-        cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
-        cd ~/ansible-django-stack & ansible-playbook -vvvv -i ansible/inventory.ini ansible/playbooks/playbook-all.yml
-
-  server1_port:
-    type: OS::Neutron::Port
-    properties:
-      network_id: { get_param: private_net_id }
-      fixed_ips:
-        - subnet_id: { get_param: private_subnet_id }
-      security_groups: [{ get_resource: server_security_group }]
-
-  server1_floating_ip:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network_id: { get_param: public_net_id }
-      port_id: { get_resource: server1_port }
-
-  server2:
-    type: OS::Nova::Server
-    properties:
+          #!/bin/bash -v
+          sudo apt update -y && sudo apt upgrade -y
+          sudo apt install nginx git ansible -y
+          git clone https://github.com/TachyonProject/ansible-django-stack
+          cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
+          cd ~/ansible-django-stack & ansible-playbook -vvvv -i ansible/inventory.ini ansible/playbooks/playbook-all.yml
+    type: "OS::Nova::Server"
+  server1_floating_ip: 
+    properties: 
+      floating_network_id: 
+        get_param: public_net_id
+      port_id: 
+        get_resource: server1_port
+    type: "OS::Neutron::FloatingIP"
+  server1_port: 
+    properties: 
+      fixed_ips: 
+        - 
+          subnet_id: 
+            get_param: private_subnet_id
+      network_id: 
+        get_param: private_net_id
+      security_groups: 
+        - 
+          get_resource: server_security_group
+    type: "OS::Neutron::Port"
+  server2: 
+    properties: 
+      flavor: 
+        get_param: flavor
+      image: 
+        get_param: image
+      key_name: 
+        get_param: key_name
       name: Server2
-      image: { get_param: image }
-      flavor: { get_param: flavor }
-      key_name: { get_param: key_name }
-      networks:
-        - port: { get_resource: server2_port }
-
-  server2_port:
-    type: OS::Neutron::Port
-    properties:
-      network_id: { get_param: private_net_id }
-      fixed_ips:
-        - subnet_id: { get_param: private_subnet_id }
-      security_groups: [{ get_resource: server_security_group }]
-
-  server2_floating_ip:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network_id: { get_param: public_net_id }
-      port_id: { get_resource: server2_port }
-
-  server_security_group:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      description: Add security group rules for server
+      networks: 
+        - 
+          port: 
+            get_resource: server2_port
+    type: "OS::Nova::Server"
+  server2_floating_ip: 
+    properties: 
+      floating_network_id: 
+        get_param: public_net_id
+      port_id: 
+        get_resource: server2_port
+    type: "OS::Neutron::FloatingIP"
+  server2_port: 
+    properties: 
+      fixed_ips: 
+        - 
+          subnet_id: 
+            get_param: private_subnet_id
+      network_id: 
+        get_param: private_net_id
+      security_groups: 
+        - 
+          get_resource: server_security_group
+    type: "OS::Neutron::Port"
+  server_security_group: 
+    properties: 
+      description: "Add security group rules for server"
       name: security-group
-      rules:
-        - remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 22
+      rules: 
+        - 
           port_range_max: 22
-        - remote_ip_prefix: 0.0.0.0/0
+          port_range_min: 22
           protocol: tcp
-          port_range_min: 80
+          remote_ip_prefix: 0.0.0.0/0
+        - 
           port_range_max: 80
-        - remote_ip_prefix: 0.0.0.0/0
+          port_range_min: 80
           protocol: tcp
-          port_range_min: 443
+          remote_ip_prefix: 0.0.0.0/0
+        - 
           port_range_max: 443
-        - remote_ip_prefix: 0.0.0.0/0
+          port_range_min: 443
+          protocol: tcp
+          remote_ip_prefix: 0.0.0.0/0
+        - 
           protocol: icmp
-          
-outputs:
-  server1_private_ip:
-    description: IP address of server on private network
-    value: { get_attr: [ server1, first_address ] }
-  server1_public_ip:
-    description: Floating IP address of server on public network
-    value: { get_attr: [ server1_floating_ip, floating_ip_address ] }
-  server2_private_ip:
-    description: IP address of server on private network
-    value: { get_attr: [ server2, first_address ] }
-  server2_public_ip:
-    description: Floating IP address of server on public network
-    value: { get_attr: [ server2_floating_ip, floating_ip_address ] }
+          remote_ip_prefix: 0.0.0.0/0
+    type: "OS::Neutron::SecurityGroup"
