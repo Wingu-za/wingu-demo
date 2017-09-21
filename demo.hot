@@ -104,14 +104,17 @@ parameters:
           port_range_max: 443
         - remote_ip_prefix: 0.0.0.0/0
           protocol: icmp
-
+          
 outputs:
-  server_ip:
-    description: Server IP Address
-    value:
-      get_attr: [ server1, accessIPv4 ]
-  server_password:
-    description: Server Password
-    value:
-      get_attr: [ server_pw, value ]
-    
+  server1_private_ip:
+    description: IP address of server on private network
+    value: { get_attr: [ server1, first_address ] }
+  server1_public_ip:
+    description: Floating IP address of server on public network
+    value: { get_attr: [ server1_floating_ip, floating_ip_address ] }
+  server2_private_ip:
+    description: IP address of server on private network
+    value: { get_attr: [ server2, first_address ] }
+  server2_public_ip:
+    description: Floating IP address of server on public network
+    value: { get_attr: [ server2_floating_ip, floating_ip_address ] }
