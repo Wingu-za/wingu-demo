@@ -39,6 +39,8 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: server1_port }
+      user_data:
+        get_file: https://raw.githubusercontent.com/TachyonProject/wingu-demo/master/user_data.sh
   
   server1_port:
     type: OS::Neutron::Port
@@ -63,6 +65,8 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: server2_port }
+      user_data:
+        get_file: https://raw.githubusercontent.com/TachyonProject/wingu-demo/master/user_data.sh
 
   server2_port:
     type: OS::Neutron::Port
