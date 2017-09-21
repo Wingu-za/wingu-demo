@@ -67,12 +67,14 @@ parameters:
       software_config_transport: POLL_TEMP_URL
       user_data: |
           #!/bin/bash -v
+          echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
           sudo apt update -y && sudo apt upgrade -y
           sudo apt install nginx git ansible -y
-          git clone https://github.com/TachyonProject/ansible-django-stack
-          cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
-          cd ~/ansible-django-stack & ansible-playbook -vvvv -i ansible/inventory.ini ansible/playbooks/playbook-all.yml
+          git clone https://github.com/TachyonProject/ansible-django-stack /opt/ansible-django-stack
+          cd /opt/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
+          cd /opt/ansible-django-stack & ansible-playbook -vvvv -i ansible/inventory.ini ansible/playbooks/playbook-all.yml
     type: "OS::Nova::Server"
+    
   server1_floating_ip: 
     properties: 
       floating_network_id: 
@@ -80,6 +82,7 @@ parameters:
       port_id: 
         get_resource: server1_port
     type: "OS::Neutron::FloatingIP"
+    
   server1_port: 
     properties: 
       fixed_ips: 
@@ -125,27 +128,20 @@ parameters:
         - 
           get_resource: server_security_group
     type: "OS::Neutron::Port"
-  server_security_group: 
-    properties: 
-      description: "Add security group rules for server"
-      name: security-group
-      rules: 
-        - 
-          port_range_max: 22
-          port_range_min: 22
-          protocol: tcp
-          remote_ip_prefix: 0.0.0.0/0
-        - 
-          port_range_max: 80
-          port_range_min: 80
-          protocol: tcp
-          remote_ip_prefix: 0.0.0.0/0
-        - 
-          port_range_max: 443
-          port_range_min: 443
-          protocol: tcp
-          remote_ip_prefix: 0.0.0.0/0
-        - 
-          protocol: icmp
-          remote_ip_prefix: 0.0.0.0/0
-    type: "OS::Neutron::SecurityGroup"
+    
+  security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+    name: the_sg
+    description: Add security group rules for server
+    rules:
+      - protocol: icmp
+      - protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+      - protocol: tcp
+        port_range_min: 80
+        port_range_max: 80
+      - protocol: tcp
+        port_range_min: 443
+        port_range_max: 443
