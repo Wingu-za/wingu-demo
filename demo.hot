@@ -69,8 +69,6 @@ parameters:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: server2_port }
-      user_data:
-        get_file: https://raw.githubusercontent.com/TachyonProject/wingu-demo/master/user_data.sh
 
   server2_port:
     type: OS::Neutron::Port
