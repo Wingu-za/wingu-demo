@@ -51,14 +51,15 @@ resources:
             - name: Start Nginx
               service: name=nginx state=started
   
-  deploy_nginx:
-    type: OS::HEAT::SoftwareDeployment
+  deploy_nginx_server1:
+    type: OS::Heat::SoftwareDeployment
     properties:
       signal_transport: TEMP_URL_SIGNAL
       config:
         get_resource: nginx_config
       server:
-        get_resource: server
+        get_resource: server1
+        
   server1:
     type: OS::Nova::Server
     properties:
@@ -148,7 +149,7 @@ outputs:
   server_ip:
     description: Server IP Address
     value:
-      get_attr: [ server, accessIPv4 ]
+      get_attr: [ server1, accessIPv4 ]
   server_password:
     description: Server Password
     value:
