@@ -137,15 +137,15 @@ outputs:
   stdout:
     description: Ansible Output
     value:
-      get_attr: [ deploy_nginx, deploy_stdout ]
+      get_attr: [ deploy_nginx_server1, deploy_stdout ]
   stderr:
     description: Ansible Error Output
     value:
-      get_attr: [ deploy_nginx, deploy_stderr ]
+      get_attr: [ deploy_nginx_server1, deploy_stderr ]
   status_code:
     description: Exit Code
     value:
-      get_attr: [ deploy_nginx, deploy_status_code ]
+      get_attr: [ deploy_nginx_server1, deploy_status_code ]
   server_ip:
     description: Server IP Address
     value:
