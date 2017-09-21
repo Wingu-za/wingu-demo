@@ -30,6 +30,35 @@ parameters:
   
   
 resources:
+  server_pw:
+    type: OS::Heat::RandomString 
+  
+  nginx_config:
+    type: OS::HEAT::SoftwareConfig
+    properties:
+      group: ansible
+      config: |
+        ---
+        - name: Install and run Nginx
+          connection: local
+          hosts: localhost
+          tasks: 
+            - name: Install Nginx
+              apt: pkg=nginx state=installed update_cache=True
+              notify:
+                - Start Nginx
+          handlers:
+            - name: Start Nginx
+              service: name=nginx state=started
+  
+  deploy_nginx:
+    type: OS::HEAT::SoftwareDeployment
+    properties:
+      signal_transport: TEMP_URL_SIGNAL
+      config:
+        get_resource: nginx_config
+      server:
+        get_resource: server
   server1:
     type: OS::Nova::Server
     properties:
@@ -39,8 +68,8 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: server1_port }
-      user_data:
-        get_file: https://raw.githubusercontent.com/TachyonProject/wingu-demo/master/user_data.sh
+      software_config_transport: POLL_TEMP_URL
+      user_data_format: SOFTWARE_CONFIG 
   
   server1_port:
     type: OS::Neutron::Port
@@ -102,3 +131,26 @@ resources:
           port_range_max: 443
         - remote_ip_prefix: 0.0.0.0/0
           protocol: icmp
+
+outputs:
+  stdout:
+    description: Ansible Output
+    value:
+      get_attr: [ deploy_nginx, deploy_stdout ]
+  stderr:
+    description: Ansible Error Output
+    value:
+      get_attr: [ deploy_nginx, deploy_stderr ]
+  status_code:
+    description: Exit Code
+    value:
+      get_attr: [ deploy_nginx, deploy_status_code ]
+  server_ip:
+    description: Server IP Address
+    value:
+      get_attr: [ server, accessIPv4 ]
+  server_password:
+    description: Server Password
+    value:
+      get_attr: [ server_pw, value ]
+    
