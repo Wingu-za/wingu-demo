@@ -38,14 +38,17 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: server1_port }
+      user_data_format: RAW
       user_data: |
         #!/bin/bash -v
         echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+        export DEBIAN_FRONTEND=noninteractive 
         sudo apt update -y
+        sudo apt upgrade -y
         sudo apt install git ansible -y
         git clone https://github.com/TachyonProject/ansible-django-stack
         cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
-        cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-all.yml
+        cd ~/ansible-django-stack & ansible-playbook -vvvv -i ansible/inventory.ini ansible/playbooks/playbook-all.yml
 
   server1_port:
     type: OS::Neutron::Port
