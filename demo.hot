@@ -48,7 +48,7 @@ resources:
         sudo apt install git ansible -y
         git clone https://github.com/TachyonProject/ansible-django-stack
         cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
-        cd ~/ansible-django-stack & ansible-playbook -vvvv -i ansible/inventory.ini ansible/playbooks/playbook-all.yml
+        cd ~/ansible-django-stack & ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-all.yml
 
   server1_port:
     type: OS::Neutron::Port
