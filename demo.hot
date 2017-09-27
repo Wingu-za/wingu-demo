@@ -63,41 +63,6 @@ resources:
       floating_network_id: { get_param: public_net_id }
       port_id: { get_resource: server1_port }
 
-  server2:
-    type: OS::Nova::Server
-    properties:
-      name: Server2
-      image: { get_param: image }
-      flavor: { get_param: flavor }
-      key_name: { get_param: key_name }
-      networks:
-        - port: { get_resource: server2_port }
-      user_data_format: RAW
-      user_data: |
-        #!/bin/bash -v
-        echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-        export DEBIAN_FRONTEND=noninteractive 
-        sudo apt update -y
-        sudo apt install git ansible -y
-        git clone https://github.com/TachyonProject/ansible-django-stack /opt/ansible-django-stack
-        cd /opt/ansible-django-stack && ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-install-python2.yml
-        cd /opt/ansible-django-stack && ansible-playbook -vvvv -i inventory.ini ansible/playbooks/playbook-all.yml
-
-
-  server2_port:
-    type: OS::Neutron::Port
-    properties:
-      network_id: { get_param: private_net_id }
-      fixed_ips:
-        - subnet_id: { get_param: private_subnet_id }
-      security_groups: [{ get_resource: server_security_group }]
-
-  server2_floating_ip:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network_id: { get_param: public_net_id }
-      port_id: { get_resource: server2_port }
-
   server_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -118,9 +83,3 @@ outputs:
   server1_public_ip:
     description: Floating IP address of server1 in public network
     value: { get_attr: [ server1_floating_ip, floating_ip_address ] }
-  server2_private_ip:
-    description: IP address of server2 in private network
-    value: { get_attr: [ server2, first_address ] }
-  server2_public_ip:
-    description: Floating IP address of server2 in public network
-    value: { get_attr: [ server2_floating_ip, floating_ip_address ] }
