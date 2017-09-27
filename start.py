@@ -1,10 +1,12 @@
 #!/usr/bin/python
+import time
+
 from keystoneauth1 import loading
 from keystoneauth1 import session
 from heatclient import client as heatclient
 from neutronclient.v2_0 import client as neutronclient
 
-from config import AUTH_URL, USERNAME, PASSWORD, PROJECT_ID
+from config import AUTH_URL, USERNAME, PASSWORD, PROJECT_ID, STACKNAME
 
 loader = loading.get_plugin_loader('password')
 auth = loader.load_from_options(auth_url=AUTH_URL,
@@ -16,22 +18,23 @@ heat = heatclient.Client('1', session=sess)
 neutron = neutronclient.Client(session=sess)
 
 
-stack_name = "testing_demo"
+stack_name = "testing_demo2"
 
 # Create Stack and Launch
 print("Creating Stack")
 try:
-    heat.stacks.create(stack_name=stack_name,
-                       template_url="https://raw.githubusercontent.com/TachyonProject/wingu-demo/master/demo.hot",
-                       password=PASSWORD)
+    heat.stacks.create(stack_name=STACKNAME,
+                       template_url="https://raw.githubusercontent.com/TachyonProject/wingu-demo/master/demo.hot")
 except Exception as e:
     print e
 
+# Sleep 15 seconds
+time.sleep(15)
 
 # Find Stack ID
 stacks = heat.stacks.list()
 for stack in stacks:
-    if stack.stack_name == stack_name:
+    if stack.stack_name == STACKNAME:
         stack_id = stack.id
 
 # Find Floating IP(s) assosciate to stack resources.
