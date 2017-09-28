@@ -16,6 +16,7 @@ TODO
 *.cab
 *.iso
 *.tar
+*.pem
 
 #package management formats
 *.dmg
