@@ -45,7 +45,7 @@ resources:
         export DEBIAN_FRONTEND=noninteractive 
         sudo apt update -y
         sudo apt install git ansible -y
-        git clone git@github.com:TachyonProject/ansible-django.git /opt/ansible-django
+        git clone https://github.com/TachyonProject/ansible-django.git /opt/ansible-django
         cd /opt/ansible-django/ansible && ansible-playbook -vvvv -i hosts provision.yml
 
   server1_port:
