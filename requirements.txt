@@ -1,2 +1,4 @@
+setuptools
+keystoneauth1
 python-heatclient
 python-neutronclient
