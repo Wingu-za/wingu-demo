@@ -1,4 +1,4 @@
-STACKNAME = "haxor2"
+STACKNAME = "demo-stack"
 AUTH_URL = 'https://identity.wingu.co.za:5000/v2.0'                                  
 USERNAME = 'wingu-demo@tachyonic.co.za'
 PASSWORD = '@vage-2017'
